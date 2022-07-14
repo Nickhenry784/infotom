@@ -129,9 +129,19 @@ android {
     ndkVersion rootProject.ext.ndkVersion
 
     compileSdkVersion rootProject.ext.compileSdkVersion
+    
+    flavorDimensions "appstore"
+
+    productFlavors{
+        amazon{
+            dimension "appstore"
+            missingDimensionStrategy "store", "amazon"
+        }
+    }
+
 
     defaultConfig {
-        applicationId "com.victoriakulas.shrimpsizestorage"
+        applicationId "com.amazon.shrimpsizestorage"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

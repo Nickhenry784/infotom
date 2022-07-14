@@ -9,7 +9,6 @@ const view = createSlice({
         action.payload.map((e) => {
           state.push(e);
         });
-        console.log("HELO", state);
       },
     },
     restore: {

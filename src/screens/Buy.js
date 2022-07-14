@@ -1,53 +1,50 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, {useCallback, useEffect, useState} from 'react';
 import {
-  View,
   Text,
   StyleSheet,
   Alert,
   ActivityIndicator,
-  TouchableOpacity,
   ScrollView,
-  Dimensions,
+  Button,
+  TouchableOpacity,
+  View,
   ImageBackground,
 } from 'react-native';
-
+import React, {useState, useEffect, useCallback} from 'react';
 import RNIap, {
   purchaseUpdatedListener,
   finishTransaction,
+  getInstallSourceAndroid,
 } from 'react-native-iap';
 
-import {useDispatch} from 'react-redux';
+import {items, subs} from '../conf';
+import { useDispatch } from 'react-redux';
 import { images } from '../assets';
-import {items} from '../conf';
-import {increamentByAmount} from '../redux/pointSlice';
+import { increamentByAmount } from '../redux/pointSlice';
 
-let purchaseUpdateSubscription = null;
-let purchaseErrorSubscription = null;
+let purchaseUpdateSubscription;
+let purchaseErrorSubscription;
 
-const windowWidth = Dimensions.get('screen').width;
-const windowHeight = Dimensions.get('screen').height;
-
-export default function Buy() {
-  // const [products, setProducts] = useState(fakeProducts);
-  // const [isLoading, setIsLoading] = useState(false);
-
+export default function App() {
   const [products, setProducts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [subscriptions, setSubscriptions] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const dispatch = useDispatch();
 
   const initialIAP = useCallback(async () => {
     try {
+      const source = getInstallSourceAndroid();
       setIsLoading(true);
       await RNIap.initConnection();
       await RNIap.flushFailedPurchasesCachedAsPendingAndroid();
+
       purchaseUpdateSubscription = purchaseUpdatedListener(purchase => {
         const receipt = purchase.purchaseToken;
         if (receipt) {
           finishTransaction(purchase, true)
             .then(() => {
-              handleCompletePurchase(purchase.productId);
+              handleCompletePurchase(purchase);
             })
             .catch(() => {
               Alert.alert('purchase is failed', 'the purchase is failed');
@@ -55,9 +52,15 @@ export default function Buy() {
         }
       });
 
-      const res = await RNIap.getProducts(items.map(item => item.sku));
+      const itemsSku = items.map(item => item.sku);
+      const subsSku = subs.map(item => item.sku);
+
+      const res = await RNIap.getProducts(itemsSku);
+      const resSubs = await RNIap.getSubscriptions(subsSku);
+
 
       setProducts(res);
+      setSubscriptions(resSubs);
     } catch (err) {
       Alert.alert(err.message);
       // console.warn(err.code, err.message);
@@ -68,6 +71,7 @@ export default function Buy() {
 
   useEffect(() => {
     initialIAP();
+
     return () => {
       if (purchaseUpdateSubscription) {
         purchaseUpdateSubscription.remove();
@@ -78,7 +82,9 @@ export default function Buy() {
     };
   }, []);
 
-  const handleCompletePurchase = productId => {
+
+  const handleCompletePurchase = ({productId}) => {
+
     switch (productId) {
       case items[0].sku:
         dispatch(increamentByAmount(items[0].value));
@@ -92,6 +98,18 @@ export default function Buy() {
       case items[3].sku:
         dispatch(increamentByAmount(items[3].value));
         break;
+      case subs[0].sku:
+        dispatch(increamentByAmount(subs[0].value));
+        break;
+      case subs[1].sku:
+        dispatch(increamentByAmount(subs[1].value));
+        break;
+      case subs[2].sku:
+        dispatch(increamentByAmount(subs[2].value));
+        break;
+      case subs[3].sku:
+        dispatch(increamentByAmount(subs[3].value));
+        break;
       default:
         break;
     }
@@ -102,28 +120,44 @@ export default function Buy() {
   };
 
   return (
-    <ImageBackground source={images.background} style={styles.bg}>
-      <ScrollView
-        contentContainerStyle={{ paddingTop: 10}}>
-        {isLoading ? (
-          <ActivityIndicator size="small" />
-        ) : (
-          <>
-            <View style={styles.itemList3}>
-              {products.map((product, index) => (
-                <View style={styles.item3} key={product.productId}>
-                  <TouchableOpacity
-                    onPress={() => handleRequestBuy(product.productId)}
-                    style={styles.item3Content}>
-                    <Text style={styles.price}>{product.localizedPrice}</Text>
-                    <Text style={styles.descr}>{product.description}</Text>
-                  </TouchableOpacity>
-                </View>
-              ))}
-            </View>
-          </>
-        )}
-      </ScrollView>
+    <ImageBackground source={images.background} style={styles.homeView}>
+    <ScrollView
+      style={styles.bg}
+      contentContainerStyle={{paddingHorizontal: 20, paddingTop: 10}}>
+      {isLoading ? (
+        <ActivityIndicator size="large" />
+      ) : (
+        <>
+          <Text style={styles.labelText}>In-app Purchase</Text>
+          <View style={styles.itemList3}>
+            {products.map((product, index) => (
+              <View style={styles.item3} key={product.productId}>
+                <TouchableOpacity
+                  onPress={() => handleRequestBuy(product.productId)}
+                  style={styles.item3Content}>
+                  <Text style={styles.price}>{product.localizedPrice}</Text>
+                  <Text style={styles.descr}>{product.description}</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
+          <Text style={styles.labelText}>Subscriptions</Text>
+          <View style={styles.itemList3}>
+            {subscriptions.map((product, index) => (
+              <View style={styles.item3} key={product.productId}>
+                <TouchableOpacity
+                  onPress={() => handleRequestBuy(product.productId)}
+                  style={styles.item3Content}>
+                  <Text style={styles.price}>{product.localizedPrice}</Text>
+                  <Text style={styles.descr}>{product.description}</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
+        </>
+      )}
+
+    </ScrollView>
     </ImageBackground>
   );
 }
@@ -134,7 +168,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     resizeMode: 'cover',
   },
   items: {
@@ -144,14 +178,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexWrap: 'wrap',
   },
-  bg: {
-    resizeMode: 'contain',
-    width: '100%',
-    height: '100%',
-  },
   itemsSubs: {
     flexDirection: 'column',
     justifyContent: 'center',
+  },
+  labelText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'black',
   },
   item: {
     margin: 5,
@@ -180,14 +214,14 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   price: {
-    fontFamily: 'AllerDisplay',
-    fontSize: windowWidth > 640 ? 30 : 20,
-    color: 'blue',
+    fontWeight: 'bold',
+    fontSize: 16,
+    color: '#212121',
   },
   descr: {
-    fontSize: windowWidth > 640 ? 20 : 18,
-    color: 'blue',
-    fontFamily: 'AllerDisplay',
+    fontSize: 14,
+    color: '#212121',
+    fontWeight: '500',
   },
   itemList: {},
   item2: {
@@ -207,9 +241,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   itemList3: {
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginHorizontal: -5,
   },
   item3: {
     width: '50%',
@@ -222,6 +256,8 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     elevation: 2,
     marginBottom: 10,
+    borderWidth: 2,
+    borderColor: 'black',
     alignItems: 'center',
     justifyContent: 'space-between',
   },

@@ -1,4 +1,4 @@
-package com.victoriakulas.shrimpsizestorage;
+package com.amazon.shrimpsizestorage;
 
 import com.facebook.react.ReactActivity;
 
