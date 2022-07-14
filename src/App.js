@@ -37,7 +37,7 @@ export default function App() {
             <Stack.Screen
               name="Month"
               component={Month}
-              options={{title: 'Shrimp Input'}}
+              options={{title: 'Fish Size'}}
             />
             <Stack.Screen
               name="ViewInfo"

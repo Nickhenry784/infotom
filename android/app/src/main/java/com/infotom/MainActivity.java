@@ -1,4 +1,4 @@
-package com.amazon.shrimpsizestorage;
+package com.amazon.sclerosize;
 
 import com.facebook.react.ReactActivity;
 

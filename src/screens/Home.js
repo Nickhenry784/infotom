@@ -4,14 +4,9 @@ import {useNavigation} from '@react-navigation/native';
 import {decrement} from '../redux/pointSlice';
 import {useDispatch, useSelector} from 'react-redux';
 import { images } from "../assets";
-import { restoreArray } from "../redux/shrimpSlice";
-import { addArray, restore } from "../redux/viewSlice";
 
 const windowWidth = Dimensions.get('screen').width;
 const windowHeight = Dimensions.get('screen').height;
-const dataMonth = [1,2,3,4,5,6];
-const dataMonth2 = [7,8,9,10,11,12];
-const numCol = 3 ;
 
 const Home = () => {
   const navigation = useNavigation();
@@ -19,26 +14,17 @@ const Home = () => {
   const points = useSelector(state => state.points);
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    dispatch(restoreArray());
-    dispatch(restore());
-  },[]);
-
-  const onClickSaveButton = () => {
+  const onClickStartButton = () => {
     if (points.value === 0) {
       Alert.alert('Please buy more turn');
       return false;
     }
     dispatch(decrement());
-    dispatch(addArray(shrimp));
+    navigation.navigate("Month");
   }
 
   const onClickViewInfoButton = () => {
     navigation.navigate("ViewInfo");
-  }
-
-  const onClickMonthButton = (id) => {
-    navigation.navigate("Month", {idItem: id});
   }
 
   const onClickTurnButton = () => {
@@ -50,36 +36,18 @@ const Home = () => {
     <ImageBackground style={appStyle.homeView} source={images.background}>
       <TouchableOpacity onPress={onClickTurnButton} style={appStyle.turnView}>
         <View style={appStyle.turn}>
-          <Image source={images.element3} style={appStyle.buyImage}/>
+          <Image source={images.fish} style={appStyle.buyImage}/>
           <Text style={appStyle.turnText}>{points.value}</Text>
         </View>
       </TouchableOpacity>
-      <FlatList data={dataMonth} scrollEnabled={false} style={{marginTop: 50}} numColumns={numCol} renderItem={({item}) => (
-        <TouchableOpacity
-        key={item}
-        onPress={() => onClickMonthButton(item)}>
-          <ImageBackground source={images.lich} style={appStyle.backStyle}>
-            <Text style={appStyle.turnText}>{item}</Text>
-          </ImageBackground>
-        </TouchableOpacity>
-      )} />
-      <Image source={images.shrimp} style={appStyle.buttonStyle} />
-      <FlatList data={dataMonth2} scrollEnabled={false} numColumns={numCol} renderItem={({item}) => (
-        <TouchableOpacity
-        key={item}
-        onPress={() => onClickMonthButton(item)}>
-          <ImageBackground source={images.lich} style={appStyle.backStyle}>
-            <Text style={appStyle.turnText}>{item}</Text>
-          </ImageBackground>
-        </TouchableOpacity>
-      )} />
+      <Image source={images.text} style={appStyle.buttonStyle} />
       <TouchableOpacity
-            onPress={onClickSaveButton}>
-              <Image source={images.save} style={appStyle.saveButton} />
+            onPress={onClickStartButton}>
+              <Image source={images.start} style={appStyle.saveButton} />
       </TouchableOpacity>
       <TouchableOpacity
             onPress={onClickViewInfoButton}>
-              <Image source={images.viewinfo} style={appStyle.saveButton} />
+              <Image source={images.view} style={appStyle.saveButton} />
       </TouchableOpacity>
     </ImageBackground>
   );
@@ -92,7 +60,7 @@ export const appStyle = StyleSheet.create({
     width: '100%',
     height: '100%',
     alignItems: 'center',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
     resizeMode: 'cover',
   },
   turnView: {
@@ -135,12 +103,13 @@ export const appStyle = StyleSheet.create({
     margin: 10,
   },
   buttonStyle: {
-    width: windowWidth * 0.4,
+    width: windowWidth * 0.6,
     height: windowWidth * 0.4,
     resizeMode: 'contain',
   },
   saveButton: {
-    width: windowWidth * 0.2,
+    marginVertical: 10,
+    width: windowWidth * 0.3,
     height: windowWidth * 0.1,
     resizeMode: 'contain',
   }

@@ -5,7 +5,6 @@ import {persistStore, persistReducer} from 'redux-persist';
 
 import pointsReducer from './pointSlice';
 import shrimpReducer from './shrimpSlice';
-import viewSlice from './viewSlice';
 
 const persistConfig = {
   key: 'root',
@@ -16,7 +15,6 @@ const persistConfig = {
 const rootReducer = combineReducers({
   points: pointsReducer,
   shrimp: shrimpReducer,
-  view: viewSlice,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

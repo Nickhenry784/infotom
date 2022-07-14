@@ -1,4 +1,4 @@
-import { View, StyleSheet, TouchableOpacity,Text, Dimensions, ImageBackground, Image, Alert ,TextInput  } from "react-native";
+import { View, StyleSheet, TouchableOpacity,Text, Dimensions, ImageBackground, Image, Alert ,TextInput, ScrollView, FlatList  } from "react-native";
 import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import { images } from "../assets";
@@ -6,56 +6,56 @@ import { addItems } from "../redux/shrimpSlice";
 
 const windowWidth = Dimensions.get('screen').width;
 const windowHeight = Dimensions.get('screen').height;
+const dataMonth = [
+  {id: 1, image: images.month1, size: 0},
+  {id: 2, image: images.month2, size: 0},
+  {id: 3, image: images.month3, size: 0},
+  {id: 4, image: images.month4, size: 0},
+  {id: 5, image: images.month5, size: 0},
+  {id: 6, image: images.month6, size: 0},
+  {id: 7, image: images.month7, size: 0},
+  {id: 8, image: images.month8, size: 0},
+  {id: 9, image: images.month9, size: 0},
+  {id: 10, image: images.month10, size: 0},
+  {id: 11, image: images.month11, size: 0},
+  {id: 12, image: images.month12, size: 0},
+]
 
 const Home = ({route, navigation}) => {
-  const {idItem} = route.params;
   const shrimp = useSelector(state => state.shrimp);
   const dispatch = useDispatch();
-  const [number, onChangeNumber] = useState(null);
-  const [number1, onChangeNumber1] = useState(null);
-  const [number2, onChangeNumber2] = useState(null);
+  const [monthSize, setMonthSize] = useState(dataMonth);
   
   const onClickSaveButton = () => {
-    const item = {id: idItem, el1: number , el2: number1, el3: number2};
-    dispatch(addItems(item));
+    const list = [...monthSize];
+    dispatch(addItems(list));
   }
 
+  const onChangeValueSize = (val, index) => {
+    const list = [...monthSize];
+    list[index].size = val;
+    setMonthSize([...list]);
+  }
 
   return (
     <ImageBackground style={appStyle.homeView} source={images.background}>
-      <View style={appStyle.buttonView}>
-        <Image source={images.element1} style={appStyle.buyImage} />
-        <TextInput
-          style={appStyle.input}
-          onChangeText={onChangeNumber}
-          value={number}
-          placeholder="Your Value"
-          keyboardType="numeric"
+        <FlatList 
+          data={dataMonth}
+          renderItem={({item, index}) => (
+            <View style={appStyle.buttonView} key={item.id}>
+              <Image source={item.image} style={appStyle.backStyle}/>
+              <TextInput
+                style={appStyle.input}
+                onChangeText={(value) => onChangeValueSize(value, index)}
+                value={monthSize[index].size.toString()}
+                keyboardType="numeric"
+              />
+            </View>
+          )}
         />
-      </View>
-      <View style={appStyle.buttonView}>
-        <Image source={images.element2} style={appStyle.buyImage} />
-        <TextInput
-          style={appStyle.input}
-          onChangeText={onChangeNumber1}
-          value={number1}
-          placeholder="Your Value"
-          keyboardType="numeric"
-        />
-      </View>
-      <View style={appStyle.buttonView}>
-        <Image source={images.element3} style={appStyle.buyImage} />
-        <TextInput
-          style={appStyle.input}
-          onChangeText={onChangeNumber2}
-          value={number2}
-          placeholder="Your Value"
-          keyboardType="numeric"
-        />
-      </View>
-      <TouchableOpacity onPress={onClickSaveButton}>
-        <Image source={images.save} style={appStyle.saveButton} />
-      </TouchableOpacity>
+        <TouchableOpacity onPress={onClickSaveButton}>
+          <Image source={images.save} style={appStyle.saveButton} />
+        </TouchableOpacity>
     </ImageBackground>
   );
 };
@@ -79,11 +79,15 @@ export const appStyle = StyleSheet.create({
   },
   input: {
     height: 60,
-    width: windowWidth * 0.8,
+    width: windowWidth * 0.6,
+    marginLeft: 20,
     borderWidth: 1,
     backgroundColor: 'white',
     borderRadius: 8,
     padding: 10,
+    fontSize: 30,
+    color: 'black',
+    textAlign: 'center',
   },
   turn: {
     flexDirection: 'row',
@@ -101,20 +105,17 @@ export const appStyle = StyleSheet.create({
     resizeMode: 'contain',
   },
   buttonView: {
-    flex: 0.2,
+    width: '80%',
+    height: windowHeight * 0.1,
     flexDirection: 'row',
-    justifyContent: 'flex-start',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    width: '100%',
+    marginVertical: 10,
   },
   backStyle: {
     width: windowWidth * 0.15,
     height: windowWidth * 0.15,
     resizeMode: 'contain',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 10,
-    margin: 10,
   },
   buttonStyle: {
     width: windowWidth * 0.4,
@@ -122,7 +123,7 @@ export const appStyle = StyleSheet.create({
     resizeMode: 'contain',
   },
   saveButton: {
-    width: windowWidth * 0.2,
+    width: windowWidth * 0.3,
     height: windowWidth * 0.1,
     resizeMode: 'contain',
   }
